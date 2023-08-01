@@ -12,8 +12,8 @@ class PlayerAdmin(admin.ModelAdmin):
 
 @admin.register(Play)
 class PlayAdmin(admin.ModelAdmin):
-    list_display = ('game', 'player', 'equality', 'is_valid', 'created', 'finished')
-    list_filter = ('finished', 'game', 'player')
+    list_display = ('game', 'player', 'equality', 'is_valid', 'error_type', 'created', 'finished')
+    list_filter = ('finished', 'game', 'error_type', 'player')
 
 
 @admin.register(Game)

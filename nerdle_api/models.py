@@ -3,6 +3,16 @@ from django.contrib.postgres.fields import ArrayField
 import random
 
 
+ERROR_TYPES = (
+    ("L", "INVALID LENGTH"),
+    ("E", "NOT EQUAL"),
+    ("M", "MANY EQUALS"),
+    ("S", "INVALID SYMBOL"),
+    ("R", "NO NUMBER ON RIGHT"),
+    ("I", "INEQUALITY"),
+)
+
+
 class Game(models.Model):
     start = models.DateTimeField()
     end = models.DateTimeField()
@@ -47,24 +57,23 @@ class Game(models.Model):
             'eq_count': self.eq_count
         }
 
-    def check_equality(self, equality):
-        # TODO: chequear que haya un igual, que se respete las operaciones, y que la igualdad sea válida
+    def check_play(self, play_equality):
+        return self.equality_error(play_equality) is None
+
+    def equality_error(self, equality):
         if len(equality) != self.eq_length:  # length
-            print('length')
-            return False
-        elif equality.count('=') != 1:  # una igualdad
-            print('una igualdad')
-            return False
+            return 'L'
+        elif equality.count('=') < 1:  # una igualdad
+            return 'E'
+        elif equality.count('=') > 1:  # una igualdad
+            return 'M'
         elif any([c not in self.valid_symbols for c in equality]):  # simbolos validos
-            print(f'simbolos validos: {self.valid_symbols}')
-            return False
+            return 'S'
         elif not equality[equality.find('=')+1:].lstrip('-').isnumeric():  # numero a la derecha
-            print(f"numero a la derecha: {equality[equality.find('=')+1:]}")
-            return False
+            return 'R'
         elif not self.__validate_equality(equality):  # igualdad valida
-            print('igualdad valida')
-            return False
-        return True
+            return 'I'
+        return None
 
     def evaluate(self, play):
         results = []
@@ -217,6 +226,7 @@ class Play(models.Model):
     game = models.ForeignKey(Game, on_delete=models.CASCADE)
     equality = models.CharField(max_length=20, blank=True, null=True)
     is_valid = models.BooleanField(default=True)
+    error_type = models.CharField(max_length=1, choices=ERROR_TYPES, null=True, default=None)
 
     results = ArrayField(models.TextField(blank=True, null=True), blank=True, null=True)
     eqs_state = ArrayField(models.BooleanField(default=False), blank=True, null=True)

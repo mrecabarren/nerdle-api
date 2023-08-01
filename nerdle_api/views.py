@@ -50,11 +50,12 @@ class NerdlePlayView(View):
                                    equality=equality)
         play.save()
 
-        if not game.check_equality(equality):
+        if not game.check_play(equality):
             play.is_valid = False
+            play.error_type = game.equality_error(equality)
             play.save()
             return HttpResponseBadRequest(
-                f'La igualdad {equality} no cumple alguna de las condiciones requeridas')
+                f'La igualdad {equality} no cumple alguna de las condiciones requeridas: {play.get_error_type_display()}')
 
         play.results = game.evaluate(equality)
         eqs_state = [r == '2'*game.eq_length for r in play.results]
