@@ -23,7 +23,8 @@ class GameAdmin(admin.ModelAdmin):
 
     def save_model(self, request, obj, form, change):
         super().save_model(request, obj, form, change)
-        obj.create_equalities()
+        if obj.equalities is None or len(obj.equalities) != obj.eq_count:
+            obj.create_equalities()
 
 
 @admin.register(Tournament)
