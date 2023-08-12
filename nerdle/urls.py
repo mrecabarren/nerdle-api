@@ -17,11 +17,12 @@ from django.contrib import admin
 from django.urls import path
 from django.views.decorators.csrf import csrf_exempt
 
-from nerdle_api.views import NerdleGamesView, NerdlePlayView, NerdleResetView
+from nerdle_api.views import NerdleGamesView, NerdlePlayView, NerdleResetView, NerdleStatusView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/games/', csrf_exempt(NerdleGamesView.as_view())),
     path('api/play/', csrf_exempt(NerdlePlayView.as_view())),
+    path('api/game/status/', csrf_exempt(NerdleStatusView.as_view())),
     path('api/reset/', csrf_exempt(NerdleResetView.as_view())),
 ]

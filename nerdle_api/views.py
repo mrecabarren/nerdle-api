@@ -102,3 +102,33 @@ class NerdleResetView(View):
         Play.objects.filter(game=game, player=player).delete()
 
         return JsonResponse({"result": 'Se eliminaron las jugadas', 'game': game_id})
+
+
+class NerdleStatusView(View):
+
+    def get(self, request):
+        game_id = request.GET.get('game', None)
+        player_key = request.GET.get('key', None)
+
+        if game_id is None or player_key is None:
+            return HttpResponseBadRequest(
+                'El GET para esta vista DEBE contener los siguientes parámetros: game, key')
+
+        player = Player.objects.filter(key=player_key).first()
+        if player is None:
+            return HttpResponseBadRequest(
+                'No hay ningún jugador para la KEY dada')
+
+        game = Game.objects.filter(id=game_id,
+                                   end__gte=datetime.now(timezone.utc)).first()
+        if game is None:
+            return HttpResponseBadRequest(
+                'El id del juego entregado no existe o no está activo')
+
+        plays_count = player.game_plays_count(game)
+        last_play = player.last_valid_play(game)
+
+        if plays_count > 0 and last_play.finished:
+            return JsonResponse({"finished": True, 'plays': plays_count, 'game': game_id})
+        else:
+            return JsonResponse({"finished": False, 'plays': plays_count, 'game': game_id})
