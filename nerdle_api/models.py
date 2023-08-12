@@ -10,6 +10,7 @@ ERROR_TYPES = (
     ("S", "INVALID SYMBOL"),
     ("R", "NO NUMBER ON RIGHT"),
     ("I", "INEQUALITY"),
+    ("P", "MULTIPLE POW"),
 )
 
 
@@ -67,6 +68,8 @@ class Game(models.Model):
             return 'E'
         elif equality.count('=') > 1:  # una igualdad
             return 'M'
+        elif equality.count('^') > 1:  # multiples elevados
+            return 'P'
         elif any([c not in self.valid_symbols for c in equality]):  # simbolos validos
             return 'S'
         elif not equality[equality.find('=')+1:].lstrip('-').isnumeric():  # numero a la derecha
@@ -157,7 +160,8 @@ class Game(models.Model):
         for i in range(0, len(self.operators_list)):
             next_d_0 = random.randint(0, 9)
             for j in range(0, 10):
-                if self.operators_list[(next_0 + i) % len(self.operators_list)] not in ['/', '%'] or (next_d_0 + j) % 10 != 0:
+                if (self.operators_list[(next_0 + i) % len(self.operators_list)] not in ['/', '%'] or (next_d_0 + j) % 10 != 0) and\
+                        (self.operators_list[(next_0 + i) % len(self.operators_list)] != '^' or '^' not in operation):
                     new_operation = f'{operation}{self.operators_list[(next_0 + i) % len(self.operators_list)]}{(next_d_0 + j) % 10}'
                     op = self.__operation_recursive(new_operation)
                     if op is not None:
