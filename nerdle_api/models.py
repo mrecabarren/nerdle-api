@@ -11,6 +11,7 @@ ERROR_TYPES = (
     ("R", "NO NUMBER ON RIGHT"),
     ("I", "INEQUALITY"),
     ("P", "MULTIPLE POW"),
+    ("X", "POW RESTRICTION"),
 )
 
 
@@ -74,8 +75,11 @@ class Game(models.Model):
             return 'S'
         elif not equality[equality.find('=')+1:].lstrip('-').isnumeric():  # numero a la derecha
             return 'R'
+        elif equality.count('^') == 1 and not self.__validate_pow(equality[equality.find('^')+1:equality.find('=')]):
+            return 'X'
         elif not self.__validate_equality(equality):  # igualdad valida
             return 'I'
+
         return None
 
     def evaluate(self, play):
@@ -196,6 +200,13 @@ class Game(models.Model):
                     if res_op is None:
                         res_op = self.__recursive_loop_operator(operation)
                     return res_op
+
+    def __validate_pow(self, sub_operation):
+        op_idxs = [i for i, c in enumerate(sub_operation) if c in self.operators_list]
+        len_digits = op_idxs[0] if len(op_idxs) > 0 else len(sub_operation)
+        if len_digits > 2:
+            return False
+        return True
 
 
 class Player(models.Model):
