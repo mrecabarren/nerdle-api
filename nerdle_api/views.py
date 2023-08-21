@@ -27,6 +27,10 @@ class NerdlePlayView(View):
             return HttpResponseBadRequest(
                 'El POST para esta vista DEBE contener los siguientes parámetros: game, key, equality')
 
+        if not game_id.isnumeric():
+            return HttpResponseBadRequest(
+                f'El id del juego debe ser un número: {game_id}')
+
         player = Player.objects.filter(key=player_key).first()
         if player is None:
             return HttpResponseBadRequest(
@@ -83,6 +87,10 @@ class NerdleResetView(View):
         if game_id is None or player_key is None:
             return HttpResponseBadRequest(
                 'El POST para esta vista DEBE contener los siguientes parámetros: game, key')
+
+        if not game_id.isnumeric():
+            return HttpResponseBadRequest(
+                f'El id del juego debe ser un número: {game_id}')
 
         player = Player.objects.filter(key=player_key).first()
         if player is None:
